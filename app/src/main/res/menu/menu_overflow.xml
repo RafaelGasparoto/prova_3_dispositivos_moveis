@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.prova_3_dispositivos_moveis.MainActivity">
+    <item
+        android:id="@+id/setor_1"
+        android:orderInCategory="100"
+        android:title="Setor 1"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/setor_2"
+        android:orderInCategory="100"
+        android:title="Setor 2"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/setor_3"
+        android:orderInCategory="100"
+        android:title="Setor 3"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/setor_4"
+        android:orderInCategory="100"
+        android:title="Setor 4"
+        app:showAsAction="never" />
+</menu>

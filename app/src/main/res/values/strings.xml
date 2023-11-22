@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">prova_3_dispositivos_moveis</string>
+    <string-array name="lista_setores">
+        <item>Setor 1</item>
+        <item>Setor 2</item>
+        <item>Setor 3</item>
+    </string-array>
 </resources>

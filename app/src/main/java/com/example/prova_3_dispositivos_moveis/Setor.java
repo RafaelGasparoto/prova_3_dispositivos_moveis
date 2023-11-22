@@ -3,6 +3,7 @@ package com.example.prova_3_dispositivos_moveis;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.widget.Spinner;
 
 public class Setor extends AppCompatActivity {
 

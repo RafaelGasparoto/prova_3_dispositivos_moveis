@@ -20,6 +20,10 @@ import java.util.LinkedList;
 public class MainActivity extends AppCompatActivity {
     final static int CRIAR_LISTA = 1;
     final static int SETOR = 2;
+    ListView lista;
+    ArrayAdapter<ListaCompras> adapter;
+    LinkedList<ListaCompras> listaCompras;
+    long idLista;
     public void makeListView() {
         listaCompras = new LinkedList<>();
         listaCompras.add(new ListaCompras(1, "Lista"));
@@ -39,10 +43,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    ListView lista;
-    ArrayAdapter<ListaCompras> adapter;
-    LinkedList<ListaCompras> listaCompras;
-    long idLista;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,5 +1,6 @@
 package com.example.prova_3_dispositivos_moveis;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -9,28 +10,80 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+import java.util.LinkedList;
+
+public class MainActivity extends AppCompatActivity {
+    final static int CRIAR_LISTA = 1;
+    final static int SETOR = 2;
+    public void makeListView() {
+        listaCompras = new LinkedList<>();
+        listaCompras.add(new ListaCompras(1, "Lista"));
+        listaCompras.add(new ListaCompras(2, "Lista"));
+        adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_single_choice,
+                listaCompras);
+        lista = findViewById(R.id.listas_compras);
+        lista.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        lista.setAdapter(adapter);
+        lista.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long i)
+            {
+                idLista = listaCompras.get(position).id;
+            }
+        });
+    }
+    ListView lista;
+    ArrayAdapter<ListaCompras> adapter;
+    LinkedList<ListaCompras> listaCompras;
+    long idLista;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initFloatingActionButton();
+        makeListView();
     }
 
     private void initFloatingActionButton() {
+        FloatingActionButton floatingActionButton = findViewById(R.id.irParaCriarLista);
+
+        floatingActionButton.setOnClickListener(view -> {
+            irParaCriarLista();
+        });
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.setor_1:
+                irParaSetor(1);
+                break;
+            case R.id.setor_2:
+                irParaSetor(2);
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
+    private void irParaSetor(int setor) {
+        Intent intent = new Intent(this, Setor.class);
+        intent.putExtra("Setor", setor);
+        startActivityForResult(intent, SETOR);
+    }
 
+    private void irParaCriarLista() {
+        Intent intent = new Intent(this, CriarLista.class);
+        startActivityForResult(intent, CRIAR_LISTA);
     }
 
     @Override

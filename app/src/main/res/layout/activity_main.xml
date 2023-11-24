@@ -15,18 +15,23 @@
         tools:ignore="MissingConstraints">
 
         <Button
+            android:id="@+id/realizar_compra"
             android:layout_width="wrap_content"
+            android:onClick="realizarCompra"
             android:layout_height="wrap_content"
             android:text="Realizar compra"></Button>
 
         <Button
+            android:id="@+id/alterar_lista_compras"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
+            android:onClick="alterarListaCompra"
             android:layout_marginRight="100dp"
             android:text="Alterar"></Button>
 
         <Button
+            android:id="@+id/exluir_lista_compras"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"

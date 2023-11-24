@@ -11,24 +11,32 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
+import com.example.prova_3_dispositivos_moveis.model.ListaCompras;
+import com.example.prova_3_dispositivos_moveis.model.Produto;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.LinkedList;
 
 public class CriarLista extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     ListView lista;
+    int pos;
     ArrayAdapter<Produto> adapter;
     LinkedList<Produto> listaProdutos;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_criar_lista);
+        Integer idLista = (Integer) getIntent().getSerializableExtra("IdLista");
+        if (idLista != null)
+            getListaDeCompras(idLista.intValue());
         iniciarSpinnerSetores();
         iniciarListaProdutos();
         iniciarFloatingActionButton();
+    }
+
+    private void getListaDeCompras(int id) {
+
     }
 
     private void iniciarFloatingActionButton() {
@@ -76,13 +84,27 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
 
     private void iniciarListaProdutos() {
         listaProdutos = new LinkedList<>();
-        listaProdutos.add(new Produto(1, "A"));
-        listaProdutos.add(new Produto(2, "B"));
+        listaProdutos.add(new Produto());
+        listaProdutos.add(new Produto());
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1,
                 listaProdutos);
         lista = findViewById(R.id.lista_produtos);
         lista.setAdapter(adapter);
+
+        adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_single_choice,
+                listaProdutos);
+        lista = findViewById(R.id.listas_compras);
+        lista.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        lista.setAdapter(adapter);
+        lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long i) {
+                pos = position;
+            }
+        });
+        lista.setItemChecked(0, true);
     }
 
     @Override

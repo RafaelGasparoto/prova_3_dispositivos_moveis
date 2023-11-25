@@ -114,10 +114,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.setor_1:
-                irParaSetor(1);
+                irParaSetor(0);
                 break;
             case R.id.setor_2:
-                irParaSetor(2);
+                irParaSetor(1);
                 break;
             default:
                 break;

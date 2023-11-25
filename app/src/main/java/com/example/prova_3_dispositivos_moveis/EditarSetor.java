@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
 import com.example.prova_3_dispositivos_moveis.dao.ProdutoDAO;
@@ -22,7 +23,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.LinkedList;
 import java.util.List;
 
-public class EditarSetor extends AppCompatActivity {
+public class EditarSetor extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
     ListView lista;
     int pos;
     ArrayAdapter<Produto> adapter;
@@ -39,24 +40,62 @@ public class EditarSetor extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         }
     }
+    Long idSetor;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_setor);
+        idSetor = (Long) getIntent().getSerializableExtra("Setor");
+        iniciarBd();
+        iniciarListaProdutos();
+        iniciarBotoes();
+        iniciarSpinnerSetores();
+    }
 
     @Override
     public void onActivityResult(int code,
                                  int result, Intent data) {
         super.onActivityResult(code, result, data);
-        getProdutosDoSetor(1);
+        if(result == RESULT_OK){
+            Boolean resetar_lista = (Boolean) data.getSerializableExtra("produto_alterado");
+            if(resetar_lista) {
+                idSetor = spinner.getSelectedItemId();
+                getProdutosDoSetor(idSetor);
+            }
+        }
+    }
+    Spinner spinner;
+    private void iniciarSpinnerSetores() {
+        spinner = (Spinner) findViewById(R.id.spinner_setores);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.lista_setores, android.R.layout.simple_spinner_item);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+        spinner.setSelection(Math.toIntExact(idSetor));
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_setor);
-        long setor = (long) getIntent().getSerializableExtra("Setor");
-        iniciarBd();
-        iniciarListaProdutos();
-        getProdutosDoSetor(setor);
-        iniciarBotoes();
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String text = parent.getItemAtPosition(position).toString();
+        switch (text) {
+            case "Setor 1":
+                getProdutosDoSetor(0);
+                break;
+            case "Setor 2":
+                getProdutosDoSetor(1);
+                break;
+            case "Setor 3":
+                getProdutosDoSetor(2);
+                break;
+        }
     }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
+
 
     private void getProdutosDoSetor(long setor) {
         produtoObs = new ObservadorProduto();

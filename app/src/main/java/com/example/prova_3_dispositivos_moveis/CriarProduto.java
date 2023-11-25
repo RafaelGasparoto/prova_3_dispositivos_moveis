@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.room.Room;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.View;
@@ -97,6 +98,9 @@ public class CriarProduto extends AppCompatActivity {
     private void esperarThread(Thread t) {
         try {
             t.join();
+            Intent data = new Intent();
+            data.putExtra("produto_alterado", true);
+            setResult(RESULT_OK, data);
             finish();
         } catch (InterruptedException e) {
             e.printStackTrace();

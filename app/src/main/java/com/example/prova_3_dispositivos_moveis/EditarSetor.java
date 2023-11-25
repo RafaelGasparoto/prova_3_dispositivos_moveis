@@ -23,7 +23,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.LinkedList;
 import java.util.List;
 
-public class EditarSetor extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+public class EditarSetor extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     ListView lista;
     int pos;
     ArrayAdapter<Produto> adapter;
@@ -32,6 +32,7 @@ public class EditarSetor extends AppCompatActivity implements AdapterView.OnItem
 
     Banco bd;
     ProdutoDAO produtoDAO;
+
     class ObservadorProduto implements Observer<List<Produto>> {
         @Override
         public void onChanged(List<Produto> produtos) {
@@ -40,7 +41,9 @@ public class EditarSetor extends AppCompatActivity implements AdapterView.OnItem
             adapter.notifyDataSetChanged();
         }
     }
+
     Long idSetor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,15 +59,17 @@ public class EditarSetor extends AppCompatActivity implements AdapterView.OnItem
     public void onActivityResult(int code,
                                  int result, Intent data) {
         super.onActivityResult(code, result, data);
-        if(result == RESULT_OK){
+        if (result == RESULT_OK) {
             Boolean resetar_lista = (Boolean) data.getSerializableExtra("produto_alterado");
-            if(resetar_lista) {
+            if (resetar_lista) {
                 idSetor = spinner.getSelectedItemId();
                 getProdutosDoSetor(idSetor);
             }
         }
     }
+
     Spinner spinner;
+
     private void iniciarSpinnerSetores() {
         spinner = (Spinner) findViewById(R.id.spinner_setores);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -98,8 +103,9 @@ public class EditarSetor extends AppCompatActivity implements AdapterView.OnItem
 
 
     private void getProdutosDoSetor(long setor) {
+        idSetor = setor;
         produtoObs = new ObservadorProduto();
-        produtoDAO.listar(setor).observe(this, produtoObs);
+        produtoDAO.listar(idSetor).observe(this, produtoObs);
     }
 
     private void iniciarBotoes() {
@@ -125,6 +131,7 @@ public class EditarSetor extends AppCompatActivity implements AdapterView.OnItem
         Intent intent = new Intent(this, CriarProduto.class);
         if (idProduto != -1)
             intent.putExtra("IdProduto", idProduto);
+        intent.putExtra("IdSetor", idSetor);
         startActivityForResult(intent, CRIAR_PRODUTO);
     }
 
@@ -148,17 +155,19 @@ public class EditarSetor extends AppCompatActivity implements AdapterView.OnItem
 
     private void excluirProduto() {
         int pos = lista.getCheckedItemPosition();
+        if (lista.getCount() != 0) {
+            Produto p = listaProdutos.get(pos);
+            new Thread(() -> {
+                produtoDAO.remover(p);
+                listaProdutos.remove(p);
+                lista.clearChoices();
+                runOnUiThread(new Thread(() -> {
+                    adapter.notifyDataSetChanged();
+                    lista.setItemChecked(0, true);
+                }));
+            }).start();
+        }
 
-        Produto p = listaProdutos.get(pos);
-        new Thread(() -> {
-            produtoDAO.remover( p );
-            listaProdutos.remove( p );
-            lista.clearChoices();
-            runOnUiThread(new Thread(() -> {
-                adapter.notifyDataSetChanged();
-                lista.setItemChecked(0, true);
-            }));
-        }).start();
     }
 
     private void alterarProduto() {

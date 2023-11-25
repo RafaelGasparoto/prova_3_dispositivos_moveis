@@ -24,13 +24,14 @@ public class CriarProduto extends AppCompatActivity {
     Banco bd;
     ProdutoDAO produtoDAO;
     ListaComprasDAO listaComprasDAO;
-    Long id;
+    Long id, idSetor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_criar_produto);
         id = (Long) getIntent().getSerializableExtra("IdProduto");
+        idSetor = (Long) getIntent().getSerializableExtra("IdSetor");
         iniciarBotao();
         iniciarBd();
         if (id != null)
@@ -74,7 +75,7 @@ public class CriarProduto extends AppCompatActivity {
         Produto produto = new Produto();
         produto.setDescricao(decricao.getText().toString());
         produto.setPreco(Double.parseDouble(preco.getText().toString()));
-        produto.setIdSetor(1);
+        produto.setIdSetor(idSetor);
 
         if (id != null) {
             produto.setId(Long.parseLong(idProduto.getText().toString()));
@@ -95,6 +96,7 @@ public class CriarProduto extends AppCompatActivity {
         t.start();
         esperarThread(t);
     }
+
     private void esperarThread(Thread t) {
         try {
             t.join();

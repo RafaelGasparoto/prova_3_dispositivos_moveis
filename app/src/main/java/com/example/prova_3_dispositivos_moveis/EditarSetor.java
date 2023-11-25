@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
@@ -28,6 +29,8 @@ public class EditarSetor extends AppCompatActivity {
     ObservadorProduto produtoObs;
     LinkedList<Produto> listaProdutos;
 
+    Banco bd;
+    ProdutoDAO produtoDAO;
     class ObservadorProduto implements Observer<List<Produto>> {
         @Override
         public void onChanged(List<Produto> produtos) {
@@ -52,7 +55,7 @@ public class EditarSetor extends AppCompatActivity {
         iniciarBd();
         iniciarListaProdutos();
         getProdutosDoSetor(setor);
-        initFloatingActionButton();
+        iniciarBotoes();
     }
 
     private void getProdutosDoSetor(long setor) {
@@ -60,15 +63,26 @@ public class EditarSetor extends AppCompatActivity {
         produtoDAO.listar(setor).observe(this, produtoObs);
     }
 
-    private void initFloatingActionButton() {
+    private void iniciarBotoes() {
         FloatingActionButton floatingActionButton = findViewById(R.id.ir_para_criar_produto);
+        Button excluir = findViewById(R.id.exluir_produto);
+        Button alterar = findViewById(R.id.alterar_produto);
 
         floatingActionButton.setOnClickListener(view -> {
             irParaCriarProduto(-1);
         });
+
+        excluir.setOnClickListener(view -> {
+            excluirProduto();
+        });
+
+        alterar.setOnClickListener(view -> {
+            alterarProduto();
+        });
+
     }
 
-    private void irParaCriarProduto(int idProduto) {
+    private void irParaCriarProduto(long idProduto) {
         Intent intent = new Intent(this, CriarProduto.class);
         if (idProduto != -1)
             intent.putExtra("IdProduto", idProduto);
@@ -83,21 +97,33 @@ public class EditarSetor extends AppCompatActivity {
         lista = findViewById(R.id.lista_produtos_do_setor);
         lista.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lista.setAdapter(adapter);
-        lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long i) {
-                pos = position;
-            }
-        });
+        lista.setOnItemClickListener((parent, view, position, i) -> pos = position);
         lista.setItemChecked(0, true);
     }
-
-    Banco bd;
-    ProdutoDAO produtoDAO;
 
     private void iniciarBd() {
         bd = Room.databaseBuilder(getApplicationContext(), Banco.class, "ListaDeCompras").
                 fallbackToDestructiveMigration().build();
         produtoDAO = bd.getProdutoDAO();
+    }
+
+    private void excluirProduto() {
+        int pos = lista.getCheckedItemPosition();
+
+        Produto p = listaProdutos.get(pos);
+        new Thread(() -> {
+            produtoDAO.remover( p );
+            listaProdutos.remove( p );
+            lista.clearChoices();
+            runOnUiThread(new Thread(() -> {
+                adapter.notifyDataSetChanged();
+                lista.setItemChecked(0, true);
+            }));
+        }).start();
+    }
+
+    private void alterarProduto() {
+        int pos = lista.getCheckedItemPosition();
+        irParaCriarProduto(listaProdutos.get(pos).getId());
     }
 }

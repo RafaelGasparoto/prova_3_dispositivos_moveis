@@ -44,7 +44,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/criar_produto"
+        android:id="@+id/confirmar_produto"
         android:layout_gravity="end"
         android:layout_marginTop="20dp"
         android:text="Confirmar"/>

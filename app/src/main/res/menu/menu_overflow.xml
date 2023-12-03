@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.prova_3_dispositivos_moveis.MainActivity">
+    tools:context="com.example.prova_3_dispositivos_moveis.telas.MainActivity">
     <item
         android:id="@+id/setor_1"
         android:orderInCategory="100"

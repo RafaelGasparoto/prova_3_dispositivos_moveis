@@ -1,9 +1,8 @@
-package com.example.prova_3_dispositivos_moveis;
+package com.example.prova_3_dispositivos_moveis.telas;
 
-import static com.example.prova_3_dispositivos_moveis.MainActivity.CRIAR_PRODUTO;
+import static com.example.prova_3_dispositivos_moveis.telas.MainActivity.CRIAR_PRODUTO;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.room.Room;
 
 import android.content.Intent;
@@ -15,33 +14,23 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.example.prova_3_dispositivos_moveis.R;
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
 import com.example.prova_3_dispositivos_moveis.dao.ProdutoDAO;
 import com.example.prova_3_dispositivos_moveis.model.Produto;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.prova_3_dispositivos_moveis.utils.*;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class EditarSetor extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     ListView lista;
     int pos;
     ArrayAdapter<Produto> adapter;
-    ObservadorProduto produtoObs;
+    ObservadorListaProdutos produtoObs;
     LinkedList<Produto> listaProdutos;
-
     Banco bd;
     ProdutoDAO produtoDAO;
-
-    class ObservadorProduto implements Observer<List<Produto>> {
-        @Override
-        public void onChanged(List<Produto> produtos) {
-            listaProdutos.clear();
-            listaProdutos.addAll(produtos);
-            adapter.notifyDataSetChanged();
-        }
-    }
-
     Long idSetor;
 
     @Override
@@ -101,10 +90,9 @@ public class EditarSetor extends AppCompatActivity implements AdapterView.OnItem
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
-
     private void getProdutosDoSetor(long setor) {
         idSetor = setor;
-        produtoObs = new ObservadorProduto();
+        produtoObs = new ObservadorListaProdutos(listaProdutos, adapter);
         produtoDAO.listar(idSetor).observe(this, produtoObs);
     }
 

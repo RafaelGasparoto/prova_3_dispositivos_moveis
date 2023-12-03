@@ -5,8 +5,11 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.RawQuery;
 import androidx.room.Update;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
+import com.example.prova_3_dispositivos_moveis.model.ListaCompras;
 import com.example.prova_3_dispositivos_moveis.model.Produto;
 
 import java.util.List;
@@ -27,6 +30,9 @@ public interface ProdutoDAO {
 
     @Query("select * from produto where id = :id")
     public LiveData<Produto> produto_por_id(long id);
+
+    @RawQuery(observedEntities = Produto.class)
+    LiveData<Long> busrcarIdUltimaLista(SupportSQLiteQuery query);
 
 
 }

@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.RawQuery;
 
 import java.io.Serializable;
+
 import java.util.List;
 @Entity(tableName = "lista_compras")
 public class ListaCompras implements Serializable {

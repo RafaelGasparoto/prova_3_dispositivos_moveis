@@ -9,7 +9,7 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    tools:context=".CriarLista">
+    tools:context=".telas.CriarLista">
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -38,6 +38,15 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginTop="20dp" />
+
+
+        <EditText
+            android:id="@+id/quantidade_produto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="Quantidade produto" />
+
         <ListView
             android:layout_marginTop="20dp"
             android:layout_marginBottom="80dp"

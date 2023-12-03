@@ -1,4 +1,4 @@
-package com.example.prova_3_dispositivos_moveis;
+package com.example.prova_3_dispositivos_moveis.telas;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -6,7 +6,6 @@ import androidx.room.Room;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,11 +15,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.example.prova_3_dispositivos_moveis.R;
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
 import com.example.prova_3_dispositivos_moveis.dao.ListaComprasDAO;
 import com.example.prova_3_dispositivos_moveis.dao.ProdutoDAO;
+import com.example.prova_3_dispositivos_moveis.model.Item;
 import com.example.prova_3_dispositivos_moveis.model.ListaCompras;
-import com.example.prova_3_dispositivos_moveis.model.Produto;
+import com.example.prova_3_dispositivos_moveis.telas.CriarLista;
+import com.example.prova_3_dispositivos_moveis.telas.EditarSetor;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.LinkedList;
@@ -30,9 +32,9 @@ public class MainActivity extends AppCompatActivity {
     final static int CRIAR_PRODUTO = 2;
     final static int SETOR = 2;
 
-     Banco bd;
-     ProdutoDAO produtoDAO;
-     ListaComprasDAO listaComprasDAO;
+    Banco bd;
+    ProdutoDAO produtoDAO;
+    ListaComprasDAO listaComprasDAO;
     ListView lista;
     ArrayAdapter<ListaCompras> adapter;
     LinkedList<ListaCompras> listaCompras;
@@ -40,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void iniciarListView() {
         listaCompras = new LinkedList<>();
-        listaCompras.add(new ListaCompras("Lista"));
-        listaCompras.add(new ListaCompras( "Lista"));
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_single_choice,
                 listaCompras);
@@ -54,18 +54,33 @@ public class MainActivity extends AppCompatActivity {
                 idLista = listaCompras.get(position).getId();
             }
         });
+        recupararListasDoBd();
         lista.setItemChecked(0, true);
         idLista = listaCompras.get(0).getId();
+    }
+
+    private void recupararListasDoBd() {
+        Thread t = new Thread(() -> {
+            listaCompras =
+                    listaComprasDAO.recuperarTodasListas();
+        });
+        try {
+            t.start();
+            t.join();
+            finish();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        iniciarBd();
         initFloatingActionButton();
         iniciarListView();
         iniciarBotoes();
-        iniciarBd();
     }
 
     private void iniciarBd() {

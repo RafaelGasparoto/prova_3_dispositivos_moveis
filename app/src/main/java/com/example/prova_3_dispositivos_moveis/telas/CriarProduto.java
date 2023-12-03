@@ -1,8 +1,11 @@
-package com.example.prova_3_dispositivos_moveis;
+package com.example.prova_3_dispositivos_moveis.telas;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.room.Room;
+import androidx.sqlite.db.SupportSQLiteProgram;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.prova_3_dispositivos_moveis.R;
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
 import com.example.prova_3_dispositivos_moveis.dao.ListaComprasDAO;
 import com.example.prova_3_dispositivos_moveis.dao.ProdutoDAO;
@@ -36,6 +40,7 @@ public class CriarProduto extends AppCompatActivity {
         iniciarBd();
         if (id != null)
             getProduto();
+        getIdLista();
     }
 
     class ObservadorProduto implements Observer<Produto> {
@@ -108,6 +113,29 @@ public class CriarProduto extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void getIdLista() {
+        SupportSQLiteQuery s = new SupportSQLiteQuery() {
+            @Override
+            public String getSql() {
+                return "select last_insert_rowid()";
+            }
+
+            @Override
+            public void bindTo(SupportSQLiteProgram statement) {
+
+            }
+
+            @Override
+            public int getArgCount() {
+                return 0;
+            }
+        };
+
+       LiveData id = produtoDAO.busrcarIdUltimaLista(s);
+        System.out.println(id.getValue());
+    }
+
 
     private void iniciarBd() {
         bd = Room.databaseBuilder(getApplicationContext(), Banco.class, "ListaDeCompras").

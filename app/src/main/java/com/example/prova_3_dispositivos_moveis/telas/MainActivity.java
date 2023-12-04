@@ -17,8 +17,10 @@ import android.widget.ListView;
 
 import com.example.prova_3_dispositivos_moveis.R;
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
+import com.example.prova_3_dispositivos_moveis.dao.ItemDAO;
 import com.example.prova_3_dispositivos_moveis.dao.ListaComprasDAO;
 import com.example.prova_3_dispositivos_moveis.dao.ProdutoDAO;
+import com.example.prova_3_dispositivos_moveis.model.Item;
 import com.example.prova_3_dispositivos_moveis.model.ListaCompras;
 import com.example.prova_3_dispositivos_moveis.utils.ObservadorListasCompras;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     Banco bd;
     ProdutoDAO produtoDAO;
+    ItemDAO itemDAO;
     ListaComprasDAO listaComprasDAO;
     ListView listView;
     ArrayAdapter<ListaCompras> adapter;
@@ -50,12 +53,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long i) {
                 idLista = listaCompras.get(position).getId();
+                pos = position;
             }
         });
         recupararListasDoBd();
         listView.setItemChecked(0, true);
     }
 
+    int pos;
     ObservadorListasCompras listaComprasObs;
 
     private void recupararListasDoBd() {
@@ -78,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         bd = Room.databaseBuilder(getApplicationContext(), Banco.class, "ListaDeCompras").
                 fallbackToDestructiveMigration().build();
         produtoDAO = bd.getProdutoDAO();
+        itemDAO = bd.getItemDAO();
         listaComprasDAO = bd.getListaComprasDAO();
     }
 
@@ -107,7 +113,14 @@ public class MainActivity extends AppCompatActivity {
     public void excluirListaCompra() {
         idLista = listView.getCheckedItemPosition();
         if (Long.valueOf(idLista) != null) {
-            listaCompras.remove(listaCompras);
+            Thread t = new Thread(() -> {
+                itemDAO.removerPorListaId(listaCompras.get(pos).getId());
+            });
+            t.start();
+            Thread tr = new Thread(() -> {
+                listaComprasDAO.remover(listaCompras.get(pos));
+            });
+            tr.start();
         }
     }
 

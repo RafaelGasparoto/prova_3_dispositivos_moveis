@@ -23,6 +23,9 @@ public interface ItemDAO {
     @Delete
     public void remover(Item item);
 
+    @Query("delete from item_lista where listaId = :listaId")
+    public void removerPorListaId(long listaId);
+
     @Query("select * from item_lista where listaId = :listaId order by id")
     public LiveData<List<Item>> listar(long listaId);
 

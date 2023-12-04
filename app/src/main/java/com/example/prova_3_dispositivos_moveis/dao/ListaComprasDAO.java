@@ -23,8 +23,8 @@ public interface ListaComprasDAO {
     public void remover(ListaCompras m);
 
     @Query("select * from lista_compras where id = :id order by nome")
-    public LiveData<List<ListaCompras>> buscarPorListaCompras(long id);
+    public LiveData<ListaCompras> buscarPorListaCompras(long id);
 
     @Query("select * from lista_compras order by id")
-    public LiveData<List<ListaCompras>> recuperarTodasListas();
+    public LiveData<List<ListaCompras>> listar();
 }

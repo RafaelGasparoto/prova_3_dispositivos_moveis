@@ -19,10 +19,8 @@ import com.example.prova_3_dispositivos_moveis.R;
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
 import com.example.prova_3_dispositivos_moveis.dao.ListaComprasDAO;
 import com.example.prova_3_dispositivos_moveis.dao.ProdutoDAO;
-import com.example.prova_3_dispositivos_moveis.model.Item;
 import com.example.prova_3_dispositivos_moveis.model.ListaCompras;
-import com.example.prova_3_dispositivos_moveis.telas.CriarLista;
-import com.example.prova_3_dispositivos_moveis.telas.EditarSetor;
+import com.example.prova_3_dispositivos_moveis.utils.ObservadorListasCompras;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.LinkedList;
@@ -35,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     Banco bd;
     ProdutoDAO produtoDAO;
     ListaComprasDAO listaComprasDAO;
-    ListView lista;
+    ListView listView;
     ArrayAdapter<ListaCompras> adapter;
     LinkedList<ListaCompras> listaCompras;
     long idLista;
@@ -45,32 +43,25 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_single_choice,
                 listaCompras);
-        lista = findViewById(R.id.listas_compras);
-        lista.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lista.setAdapter(adapter);
-        lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView = findViewById(R.id.listas_compras);
+        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long i) {
                 idLista = listaCompras.get(position).getId();
             }
         });
         recupararListasDoBd();
-        lista.setItemChecked(0, true);
-        idLista = listaCompras.get(0).getId();
+        listView.setItemChecked(0, true);
     }
 
+    ObservadorListasCompras listaComprasObs;
+
     private void recupararListasDoBd() {
-        Thread t = new Thread(() -> {
-            listaCompras =
-                    listaComprasDAO.recuperarTodasListas();
-        });
-        try {
-            t.start();
-            t.join();
-            finish();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        listaComprasObs = new ObservadorListasCompras(listaCompras, adapter);
+        listaComprasDAO.listar().observe(this, listaComprasObs);
+
     }
 
     @Override
@@ -100,18 +91,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void realizarCompra() {
+        idLista = listView.getCheckedItemPosition();
         if (Long.valueOf(idLista) != null) {
 
         }
     }
 
     public void alterarListaCompra() {
+        idLista = listaCompras.get(listView.getCheckedItemPosition()).getId();
         if (Long.valueOf(idLista) != null) {
-            irParaCriarLista(Math.toIntExact(Long.valueOf(idLista)));
+            irParaCriarLista(idLista);
         }
     }
 
     public void excluirListaCompra() {
+        idLista = listView.getCheckedItemPosition();
         if (Long.valueOf(idLista) != null) {
             listaCompras.remove(listaCompras);
         }
@@ -146,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, SETOR);
     }
 
-    private void irParaCriarLista(int idLista) {
+    private void irParaCriarLista(long idLista) {
         Intent intent = new Intent(this, CriarLista.class);
         if (idLista != -1)
             intent.putExtra("IdLista", idLista);

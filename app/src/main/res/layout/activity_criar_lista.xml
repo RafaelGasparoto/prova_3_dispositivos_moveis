@@ -39,19 +39,24 @@
             android:layout_height="40dp"
             android:layout_marginTop="20dp" />
 
-
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/labelQuantidade"
+            android:text="Quantidade"/>
         <EditText
+            android:labelFor="@id/labelQuantidade"
             android:id="@+id/quantidade_produto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:hint="Quantidade produto" />
+            android:inputType="numberDecimal"/>
 
         <ListView
             android:layout_marginTop="20dp"
             android:layout_marginBottom="80dp"
             android:id="@+id/lista_produtos"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 

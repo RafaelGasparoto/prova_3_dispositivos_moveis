@@ -4,6 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
+
 @Entity(tableName = "produto")
 public class Produto implements Serializable {
     @PrimaryKey(autoGenerate = true)
@@ -14,12 +15,7 @@ public class Produto implements Serializable {
 
     @Override
     public String toString() {
-        return "Produto{" +
-                "id=" + getId() +
-                ", descricao='" + getDescricao() + '\'' +
-                ", preco=" + getPreco() +
-                ", idSetor=" + getIdSetor() +
-                '}';
+        return getId() + " - " + getDescricao()  + "   R$" + getPreco();
     }
 
     public long getId() {

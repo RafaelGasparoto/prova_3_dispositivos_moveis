@@ -2,6 +2,7 @@ package com.example.prova_3_dispositivos_moveis.telas;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.room.Room;
 
 import android.os.Bundle;
@@ -28,15 +29,14 @@ import com.example.prova_3_dispositivos_moveis.model.Produto;
 import com.example.prova_3_dispositivos_moveis.utils.ObservadorListaProdutos;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class CriarLista extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     ListView lista;
     int pos;
     ArrayAdapter<Produto> adapter;
-    ArrayList<Item> listaItens = new ArrayList<Item>();
+    List<Item> listaItens;
     LinkedList<Produto> listaProdutos;
 
     @Override
@@ -45,13 +45,10 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         setContentView(R.layout.activity_criar_lista);
         listaId = (Long) getIntent().getSerializableExtra("IdLista");
         iniciarBd();
-        if (listaId != null)
-            getListaDeCompras(listaId.intValue());
         iniciarSpinnerSetores();
         iniciarListaProdutos();
         iniciarListenQuantidade();
         iniciarFloatingActionButton();
-        getIdLista();
     }
 
     private void iniciarListenQuantidade() {
@@ -76,19 +73,15 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         });
     }
 
-    private void getIdLista() {
-
-    }
-
-    private void getListaDeCompras(int id) {
-
-    }
-
     Banco bd;
     ItemDAO itemDAO;
     ProdutoDAO produtoDAO;
     ListaComprasDAO listaDAO;
     ObservadorListaProdutos observadorListaProdutos;
+    ObservadorItens observadorListaItens;
+    ListaCompras listaCompras;
+    ObservadorListaCompras listaCompraObs;
+
     Long listaId;
     Long idSetor;
 
@@ -103,8 +96,68 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
 
     private void getProdutosDoSetor(long setor) {
         idSetor = setor;
-        observadorListaProdutos = new ObservadorListaProdutos(listaProdutos, adapter);
+        observadorListaProdutos = new ObservadorListaProdutos(listaProdutos, adapter, () -> getListaDeCompras());
         produtoDAO.listar(idSetor).observe(this, observadorListaProdutos);
+    }
+
+    private void getListaDeCompras() {
+        if (listaId != null) {
+            listaCompraObs = new ObservadorListaCompras();
+            listaDAO.buscarPorListaCompras(listaId).observe(this, listaCompraObs);
+            observadorListaItens = new ObservadorItens();
+            itemDAO.listar(listaId).observe(this, observadorListaItens);
+        }
+    }
+
+    class ObservadorItens implements Observer<List<Item>> {
+        @Override
+        public void onChanged(List<Item> itens) {
+            listaItens = itens;
+            setQuantidadeEditText();
+            setProdutosItens();
+        }
+    }
+
+    public void setProdutosItens() {
+        for (int pos = 0; listaItens.size() > pos; pos++) {
+            produtoDAO.produto_por_id(listaItens.get(pos).getProdutoId()).observe(this, new ObservadorProduto(pos));
+        }
+    }
+    class ObservadorProduto implements Observer<Produto> {
+        int pos;
+        public ObservadorProduto(int pos) {
+            this.pos = pos;
+        }
+        @Override
+        public void onChanged(Produto produto) {
+            listaItens.get(pos).setProduto(produto);
+        }
+    }
+
+
+    private void setQuantidadeEditText() {
+        EditText quantidade = findViewById(R.id.quantidade_produto);
+        boolean inserido = false;
+        for (Item item : listaItens) {
+            if (item.getProdutoId() == listaProdutos.get(pos).getId()) {
+                quantidade.setText(String.valueOf(item.getQuantidade()));
+                inserido = true;
+            }
+        }
+        if (!inserido) {
+            quantidade.setText("");
+        }
+    }
+
+
+
+    class ObservadorListaCompras implements Observer<ListaCompras> {
+        @Override
+        public void onChanged(ListaCompras listaCompra) {
+            listaCompras = listaCompra;
+            EditText nomeLista = findViewById(R.id.nome_lista);
+            nomeLista.setText(listaCompras.getNome());
+        }
     }
 
     private void iniciarFloatingActionButton() {
@@ -160,11 +213,16 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
             ListaCompras listaCompras = new ListaCompras(nomeLista.getText().toString());
             double valorEstimado = 0;
             for (Item item : listaItens) {
-                valorEstimado += item.getQuantidade() * item.getProduto().getPreco();
+                Produto produto = item.getProduto();
+                valorEstimado += item.getQuantidade() * produto.getPreco();
             }
             listaCompras.setValorEstimado(valorEstimado);
             listaCompras.setPrioridade(0);
-            listaId = listaDAO.inserir(listaCompras);
+            if (listaId == null) {
+                listaId = listaDAO.inserir(listaCompras);
+            } else {
+                listaDAO.alterar(listaCompras);
+            }
         });
         tryThread(t);
         inserirItens();
@@ -173,8 +231,12 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     private void inserirItens() {
         Thread t = new Thread(() -> {
             for (Item item : listaItens) {
-                item.setListaId(listaId);
-                itemDAO.inserir(item);
+                if (Long.valueOf(item.getListaId()) == null) {
+                    item.setListaId(listaId);
+                    itemDAO.inserir(item);
+                } else {
+                    itemDAO.alterar(item);
+                }
             }
         });
         tryThread(t);
@@ -213,8 +275,7 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
 
         lista.setOnItemClickListener((parent, view, position, i) -> {
             pos = position;
-            EditText quantidade = findViewById(R.id.quantidade_produto);
-            quantidade.setText("");
+            setQuantidadeEditText();
         });
         lista.setItemChecked(0, true);
     }

@@ -29,6 +29,7 @@ import com.example.prova_3_dispositivos_moveis.model.Produto;
 import com.example.prova_3_dispositivos_moveis.utils.ObservadorListaProdutos;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,6 +39,18 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     ArrayAdapter<Produto> adapter;
     List<Item> listaItens;
     LinkedList<Produto> listaProdutos;
+
+    Banco bd;
+    ItemDAO itemDAO;
+    ProdutoDAO produtoDAO;
+    ListaComprasDAO listaDAO;
+    ObservadorListaProdutos observadorListaProdutos;
+    ObservadorItens observadorListaItens;
+    ListaCompras listaCompras;
+    ObservadorListaCompras listaCompraObs;
+
+    Long listaId;
+    Long idSetor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,17 +86,25 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         });
     }
 
-    Banco bd;
-    ItemDAO itemDAO;
-    ProdutoDAO produtoDAO;
-    ListaComprasDAO listaDAO;
-    ObservadorListaProdutos observadorListaProdutos;
-    ObservadorItens observadorListaItens;
-    ListaCompras listaCompras;
-    ObservadorListaCompras listaCompraObs;
+    private void iniciarSpinnerSetores() {
+        Spinner spinner = (Spinner) findViewById(R.id.setores_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.lista_setores, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+//        spinner.setSelection(0);
+    }
 
-    Long listaId;
-    Long idSetor;
+    private void iniciarFloatingActionButton() {
+        FloatingActionButton floatingActionButton = findViewById(R.id.criarLista);
+
+        floatingActionButton.setOnClickListener(view -> {
+            if (checkCriarLista()) {
+                confirmar();
+            }
+        });
+    }
 
     private void iniciarBd() {
         bd = Room.databaseBuilder(getApplicationContext(), Banco.class, "ListaDeCompras").
@@ -109,65 +130,28 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         }
     }
 
-    class ObservadorItens implements Observer<List<Item>> {
-        @Override
-        public void onChanged(List<Item> itens) {
-            listaItens = itens;
-            setQuantidadeEditText();
-            setProdutosItens();
-        }
-    }
-
     public void setProdutosItens() {
         for (int pos = 0; listaItens.size() > pos; pos++) {
             produtoDAO.produto_por_id(listaItens.get(pos).getProdutoId()).observe(this, new ObservadorProduto(pos));
         }
     }
-    class ObservadorProduto implements Observer<Produto> {
-        int pos;
-        public ObservadorProduto(int pos) {
-            this.pos = pos;
-        }
-        @Override
-        public void onChanged(Produto produto) {
-            listaItens.get(pos).setProduto(produto);
-        }
-    }
 
+    List<Item> removerListaItens = new ArrayList<>();
 
     private void setQuantidadeEditText() {
         EditText quantidade = findViewById(R.id.quantidade_produto);
         boolean inserido = false;
+
         for (Item item : listaItens) {
             if (item.getProdutoId() == listaProdutos.get(pos).getId()) {
                 quantidade.setText(String.valueOf(item.getQuantidade()));
                 inserido = true;
             }
         }
+
         if (!inserido) {
             quantidade.setText("");
         }
-    }
-
-
-
-    class ObservadorListaCompras implements Observer<ListaCompras> {
-        @Override
-        public void onChanged(ListaCompras listaCompra) {
-            listaCompras = listaCompra;
-            EditText nomeLista = findViewById(R.id.nome_lista);
-            nomeLista.setText(listaCompras.getNome());
-        }
-    }
-
-    private void iniciarFloatingActionButton() {
-        FloatingActionButton floatingActionButton = findViewById(R.id.criarLista);
-
-        floatingActionButton.setOnClickListener(view -> {
-            if (checkCriarLista()) {
-                confirmar();
-            }
-        });
     }
 
     private boolean checkCriarLista() {
@@ -210,18 +194,21 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     private void criarLista() {
         Thread t = new Thread(() -> {
             EditText nomeLista = findViewById(R.id.nome_lista);
-            ListaCompras listaCompras = new ListaCompras(nomeLista.getText().toString());
             double valorEstimado = 0;
             for (Item item : listaItens) {
                 Produto produto = item.getProduto();
                 valorEstimado += item.getQuantidade() * produto.getPreco();
             }
-            listaCompras.setValorEstimado(valorEstimado);
-            listaCompras.setPrioridade(0);
+
             if (listaId == null) {
+                ListaCompras listaCompras = new ListaCompras(nomeLista.getText().toString());
+                listaCompras.setValorEstimado(valorEstimado);
+                listaCompras.setPrioridade(0);
                 listaId = listaDAO.inserir(listaCompras);
             } else {
-                listaDAO.alterar(listaCompras);
+                this.listaCompras.setNome(nomeLista.getText().toString());
+                this.listaCompras.setValorEstimado(valorEstimado);
+                listaDAO.alterar(this.listaCompras);
             }
         });
         tryThread(t);
@@ -231,7 +218,7 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     private void inserirItens() {
         Thread t = new Thread(() -> {
             for (Item item : listaItens) {
-                if (Long.valueOf(item.getListaId()) == null) {
+                if (Long.valueOf(item.getListaId()) == -1) {
                     item.setListaId(listaId);
                     itemDAO.inserir(item);
                 } else {
@@ -239,7 +226,16 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
                 }
             }
         });
+
+        Thread tr = new Thread(() -> {
+            for (Item item : removerListaItens) {
+                if (item.getListaId() == listaId)
+                    itemDAO.remover(item);
+            }
+        });
+
         tryThread(t);
+        tryThread(tr);
         finish();
     }
 
@@ -247,21 +243,11 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         try {
             t.start();
             t.join();
-            finish();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private void iniciarSpinnerSetores() {
-        Spinner spinner = (Spinner) findViewById(R.id.setores_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.lista_setores, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
-//        spinner.setSelection(0);
-    }
 
     private void iniciarListaProdutos() {
         listaProdutos = new LinkedList<>();
@@ -281,16 +267,41 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     }
 
     private void salvarQuantidade(double quantidade) {
-        boolean itemInserido = false;
+        Item itemAlterado = null;
         for (Item item : listaItens) {
             if (item.getProdutoId() == listaProdutos.get(pos).getId()) {
-                itemInserido = true;
                 item.setQuantidade(quantidade);
+                if (quantidade == 0) {
+                    removerListaItens.add(item);
+                }
+                itemAlterado = item;
             }
         }
 
-        if (itemInserido == false) {
-            inserirItem(quantidade);
+        if (quantidade == 0 && itemAlterado != null) {
+            int pos = removerListaItens.indexOf(itemAlterado);
+            if (pos != -1) {
+                listaItens.remove(removerListaItens.get(pos));
+            }
+        } else if (quantidade != 0 && itemAlterado != null) {
+            int pos = removerListaItens.indexOf(itemAlterado);
+            if (pos != -1) {
+                listaItens.add(removerListaItens.get(pos));
+                removerListaItens.remove(itemAlterado);
+            }
+        } else if (quantidade != 0) {
+            for (Item item : removerListaItens) {
+                if (listaProdutos.get(pos).getId() == item.getProdutoId()) {
+                    item.setQuantidade(quantidade);
+                    itemAlterado = item;
+                    listaItens.add(item);
+                }
+            }
+            if (itemAlterado != null) {
+                removerListaItens.remove(itemAlterado);
+            } else {
+                inserirItem(quantidade);
+            }
         }
     }
 
@@ -300,6 +311,7 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         item.setQuantidade(quantidade);
         item.setProdutoId(listaProdutos.get(pos).getId());
         item.setProduto(listaProdutos.get(pos));
+        item.setListaId(-1);
         listaItens.add(item);
     }
 
@@ -321,6 +333,38 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
     }
+
+    class ObservadorItens implements Observer<List<Item>> {
+        @Override
+        public void onChanged(List<Item> itens) {
+            listaItens = itens;
+            setQuantidadeEditText();
+            setProdutosItens();
+        }
+    }
+
+    class ObservadorListaCompras implements Observer<ListaCompras> {
+        @Override
+        public void onChanged(ListaCompras listaCompra) {
+            listaCompras = listaCompra;
+            EditText nomeLista = findViewById(R.id.nome_lista);
+            nomeLista.setText(listaCompras.getNome());
+        }
+    }
+
+    class ObservadorProduto implements Observer<Produto> {
+        int pos;
+
+        public ObservadorProduto(int pos) {
+            this.pos = pos;
+        }
+
+        @Override
+        public void onChanged(Produto produto) {
+            listaItens.get(pos).setProduto(produto);
+        }
+    }
+
+
 }

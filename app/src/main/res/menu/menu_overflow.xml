@@ -19,9 +19,4 @@
         android:orderInCategory="100"
         android:title="Setor 3"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/setor_4"
-        android:orderInCategory="100"
-        android:title="Setor 4"
-        app:showAsAction="never" />
 </menu>

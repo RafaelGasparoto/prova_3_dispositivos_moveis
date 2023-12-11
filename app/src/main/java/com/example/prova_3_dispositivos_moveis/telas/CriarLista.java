@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.room.Room;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -39,7 +40,6 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     ArrayAdapter<Produto> adapter;
     List<Item> listaItens;
     LinkedList<Produto> listaProdutos;
-
     Banco bd;
     ItemDAO itemDAO;
     ProdutoDAO produtoDAO;
@@ -56,6 +56,7 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_criar_lista);
+        listaItens = new ArrayList<>();
         listaId = (Long) getIntent().getSerializableExtra("IdLista");
         iniciarBd();
         iniciarSpinnerSetores();
@@ -87,13 +88,12 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     }
 
     private void iniciarSpinnerSetores() {
-        Spinner spinner = (Spinner) findViewById(R.id.setores_spinner);
+        Spinner spinner = findViewById(R.id.setores_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.lista_setores, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
-//        spinner.setSelection(0);
     }
 
     private void iniciarFloatingActionButton() {
@@ -121,13 +121,18 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         produtoDAO.listar(idSetor).observe(this, observadorListaProdutos);
     }
 
+    boolean first = true;
+
     private void getListaDeCompras() {
-        if (listaId != null) {
+        if (listaId != null && first) {
             listaCompraObs = new ObservadorListaCompras();
             listaDAO.buscarPorListaCompras(listaId).observe(this, listaCompraObs);
             observadorListaItens = new ObservadorItens();
             itemDAO.listar(listaId).observe(this, observadorListaItens);
+            first = false;
         }
+        lista.setItemChecked(0, true);
+        setQuantidadeEditText();
     }
 
     public void setProdutosItens() {
@@ -143,7 +148,8 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
         boolean inserido = false;
 
         for (Item item : listaItens) {
-            if (item.getProdutoId() == listaProdutos.get(pos).getId()) {
+
+            if (!listaProdutos.isEmpty() && item.getProdutoId() == listaProdutos.get(pos).getId()) {
                 quantidade.setText(String.valueOf(item.getQuantidade()));
                 inserido = true;
             }
@@ -236,6 +242,9 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
 
         tryThread(t);
         tryThread(tr);
+        Intent intent = new Intent();
+        intent.putExtra("lista_produtos_alterado", true);
+        setResult(RESULT_OK, intent);
         finish();
     }
 
@@ -267,6 +276,8 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     }
 
     private void salvarQuantidade(double quantidade) {
+        if(listaProdutos.isEmpty())
+            return;
         Item itemAlterado = null;
         for (Item item : listaItens) {
             if (item.getProdutoId() == listaProdutos.get(pos).getId()) {
@@ -365,6 +376,4 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
             listaItens.get(pos).setProduto(produto);
         }
     }
-
-
 }

@@ -49,12 +49,9 @@ public class MainActivity extends AppCompatActivity {
         listView = findViewById(R.id.listas_compras);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long i) {
-                idLista = listaCompras.get(position).getId();
-                pos = position;
-            }
+        listView.setOnItemClickListener((parent, view, position, i) -> {
+            idLista = listaCompras.get(position).getId();
+            pos = position;
         });
         recupararListasDoBd();
         listView.setItemChecked(0, true);
@@ -78,7 +75,17 @@ public class MainActivity extends AppCompatActivity {
         iniciarListView();
         iniciarBotoes();
     }
-
+    @Override
+    public void onActivityResult(int code,
+                                 int result, Intent data) {
+        super.onActivityResult(code, result, data);
+        if (result == RESULT_OK) {
+            Boolean resetar_lista = (Boolean) data.getSerializableExtra("lista_produtos_alterado");
+            if (resetar_lista) {
+                recupararListasDoBd();
+            }
+        }
+    }
     private void iniciarBd() {
         bd = Room.databaseBuilder(getApplicationContext(), Banco.class, "ListaDeCompras").
                 fallbackToDestructiveMigration().build();
@@ -140,6 +147,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.setor_2:
                 irParaSetor(1);
+                break;
+            case R.id.setor_3:
+                irParaSetor(2);
                 break;
             default:
                 break;

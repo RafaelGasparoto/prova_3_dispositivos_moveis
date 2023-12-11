@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.prova_3_dispositivos_moveis.R;
 import com.example.prova_3_dispositivos_moveis.dao.Banco;
@@ -30,6 +31,7 @@ import java.util.LinkedList;
 public class MainActivity extends AppCompatActivity {
     final static int CRIAR_LISTA = 1;
     final static int CRIAR_PRODUTO = 2;
+    final static int REALIZAR_COMPRA = 3;
     final static int SETOR = 2;
 
     Banco bd;
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         iniciarListView();
         iniciarBotoes();
     }
+
     @Override
     public void onActivityResult(int code,
                                  int result, Intent data) {
@@ -86,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     private void iniciarBd() {
         bd = Room.databaseBuilder(getApplicationContext(), Banco.class, "ListaDeCompras").
                 fallbackToDestructiveMigration().build();
@@ -104,21 +108,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void realizarCompra() {
-        idLista = listView.getCheckedItemPosition();
-        if (Long.valueOf(idLista) != null) {
+        if (listaCompras.isEmpty()) {
+            mensagemNenhumaLista();
+            return;
+        }
 
+        idLista = listaCompras.get(listView.getCheckedItemPosition()).getId();
+        if (Long.valueOf(idLista) != null) {
+            irParaRealizarCompra(idLista);
         }
     }
 
-    public void alterarListaCompra() {
+    private void alterarListaCompra() {
+        if (listaCompras.isEmpty()) {
+            mensagemNenhumaLista();
+            return;
+        }
+
         idLista = listaCompras.get(listView.getCheckedItemPosition()).getId();
         if (Long.valueOf(idLista) != null) {
             irParaCriarLista(idLista);
         }
     }
 
-    public void excluirListaCompra() {
+    private void mensagemNenhumaLista() {
+        Toast toast = Toast.makeText(getApplicationContext(), "Nenhuma lista cadastrada", Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    private void excluirListaCompra() {
         idLista = listView.getCheckedItemPosition();
+        if (listaCompras.isEmpty()) {
+            mensagemNenhumaLista();
+            return;
+        }
         if (Long.valueOf(idLista) != null) {
             Thread t = new Thread(() -> {
                 itemDAO.removerPorListaId(listaCompras.get(pos).getId());
@@ -168,6 +191,14 @@ public class MainActivity extends AppCompatActivity {
         if (idLista != -1)
             intent.putExtra("IdLista", idLista);
         startActivityForResult(intent, CRIAR_LISTA);
+    }
+
+    private void irParaRealizarCompra(long idLista) {
+        if (idLista != -1) {
+            Intent intent = new Intent(this, RealizarCompra.class);
+            startActivityForResult(intent, REALIZAR_COMPRA);
+            intent.putExtra("IdLista", idLista);
+        }
     }
 
     @Override

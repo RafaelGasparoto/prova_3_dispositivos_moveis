@@ -4,6 +4,74 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="20dp"
     tools:context=".telas.RealizarCompra">
 
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Realizar Compras"
+            android:textAlignment="center"
+            android:textSize="20dp" />
+
+        <EditText
+            android:id="@+id/nome_lista"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:hint="Nome da lista" />
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:columnCount="2"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginEnd="10dp"
+                android:text="Quantidade comprar" />
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginEnd="10dp"
+                android:text="Quantidade faltante" />
+
+            <EditText
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/quantidade_comprar"
+                android:inputType="numberDecimal"
+                android:hint="Quantidade" />
+
+            <EditText
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/quantidade_faltante"
+                android:enabled="false"
+                android:hint="Quantidade"/>
+        </GridLayout>
+        <Spinner
+            android:id="@+id/setores_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="40dp" />
+        <ListView
+            android:id="@+id/lista_produtos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="80dp" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.constraintlayout.widget.ConstraintLayout>

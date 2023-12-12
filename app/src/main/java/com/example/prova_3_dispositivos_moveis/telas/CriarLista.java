@@ -48,7 +48,6 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     ObservadorItens observadorListaItens;
     ListaCompras listaCompras;
     ObservadorListaCompras listaCompraObs;
-
     Long listaId;
     Long idSetor;
 
@@ -276,7 +275,7 @@ public class CriarLista extends AppCompatActivity implements AdapterView.OnItemS
     }
 
     private void salvarQuantidade(double quantidade) {
-        if(listaProdutos.isEmpty())
+        if (listaProdutos.isEmpty())
             return;
         Item itemAlterado = null;
         for (Item item : listaItens) {

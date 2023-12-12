@@ -28,6 +28,9 @@ public interface ProdutoDAO {
     @Query("select * from produto where idSetor = :idSetor order by id")
     public LiveData<List<Produto>> listar(long idSetor);
 
+    @Query("select * from produto where idSetor = :idSetor and id = :listaId order by id")
+    public LiveData<Produto> listarProdutosComprar(long idSetor, long listaId);
+
     @Query("select * from produto where id = :id")
     public LiveData<Produto> produto_por_id(long id);
 

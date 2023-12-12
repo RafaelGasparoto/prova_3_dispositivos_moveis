@@ -196,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
     private void irParaRealizarCompra(long idLista) {
         if (idLista != -1) {
             Intent intent = new Intent(this, RealizarCompra.class);
-            startActivityForResult(intent, REALIZAR_COMPRA);
             intent.putExtra("IdLista", idLista);
+            startActivityForResult(intent, REALIZAR_COMPRA);
         }
     }
 

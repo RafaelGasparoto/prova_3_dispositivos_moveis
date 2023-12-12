@@ -11,6 +11,7 @@ public class Item implements Serializable {
     @PrimaryKey(autoGenerate = true)
     private long id;
     private double quantidade;
+    private double quantidadeFaltante;
     private boolean comprado;
     private long listaId;
     private long produtoId;
@@ -74,5 +75,13 @@ public class Item implements Serializable {
 
     public void setProduto(Produto produto) {
         this.produto = produto;
+    }
+
+    public double getQuantidadeFaltante() {
+        return quantidadeFaltante;
+    }
+
+    public void setQuantidadeFaltante(double quantidadeFaltante) {
+        this.quantidadeFaltante = quantidadeFaltante;
     }
 }

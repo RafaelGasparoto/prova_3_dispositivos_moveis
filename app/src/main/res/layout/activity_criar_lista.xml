@@ -13,6 +13,7 @@
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/criarLista"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
@@ -20,18 +21,41 @@
         android:layout_marginBottom="16dp"
         android:src="@drawable/baseline_add_24"
         app:fabSize="normal"
-        android:id="@+id/criarLista"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cadastro lista de compras"
+            android:textAlignment="center"
+            android:textSize="20dp" />
+
         <EditText
             android:id="@+id/nome_lista"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Nome da lista" />
+
+
+        <TextView
+            android:id="@+id/labelQuantidade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Quantidade" />
+
+        <EditText
+            android:id="@+id/quantidade_produto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:labelFor="@id/labelQuantidade" />
 
         <Spinner
             android:id="@+id/setores_spinner"
@@ -39,27 +63,13 @@
             android:layout_height="40dp"
             android:layout_marginTop="20dp" />
 
-        <TextView
-            android:layout_marginTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/labelQuantidade"
-            android:text="Quantidade"/>
-        <EditText
-            android:labelFor="@id/labelQuantidade"
-            android:id="@+id/quantidade_produto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberDecimal"/>
-
         <ListView
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="80dp"
             android:id="@+id/lista_produtos"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="80dp" />
     </androidx.appcompat.widget.LinearLayoutCompat>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
